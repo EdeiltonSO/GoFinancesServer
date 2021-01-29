@@ -27,7 +27,6 @@ class Transaction {
   @Column()
   category_id: string;
 
-  // RELATIONSHIP WITH THE CATEGORY TABLE
   @ManyToOne(() => Category)
   @JoinColumn({ name: 'category_id' })
   category: Category;

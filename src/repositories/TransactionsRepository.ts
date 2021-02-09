@@ -52,7 +52,7 @@ class TransactionsRepository extends Repository<Transaction> {
     const categoryRepository = getRepository(Category);
     if (!category) throw new AppError('A category must need a title');
 
-    const categoryObject = await categoryRepository.findOne({
+    let categoryObject = await categoryRepository.findOne({
       where: { title: category },
     });
 
@@ -61,9 +61,9 @@ class TransactionsRepository extends Repository<Transaction> {
     if (categoryObject) {
       categoryId = categoryObject.id;
     } else {
-      const newCategory = categoryRepository.create({ title: category });
-      await categoryRepository.save(newCategory);
-      categoryId = newCategory.id;
+      categoryObject = categoryRepository.create({ title: category });
+      await categoryRepository.save(categoryObject);
+      categoryId = categoryObject.id;
     }
 
     // TRANSACTION VALIDATION
@@ -91,7 +91,20 @@ class TransactionsRepository extends Repository<Transaction> {
 
     await transactionRepository.save(transaction);
 
-    return transaction;
+    const { id } = transaction;
+    const { created_at } = transaction;
+    const { updated_at } = transaction;
+
+    return {
+      id,
+      title,
+      type,
+      value,
+      category_id: categoryId,
+      created_at,
+      updated_at,
+      category: categoryObject,
+    };
   }
 }
 

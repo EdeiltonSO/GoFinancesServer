@@ -15,11 +15,18 @@ interface Balance {
   total: number;
 }
 
-interface TransactionInterface {
+interface CreateTransactionInterface {
   title: string;
   value: number;
   type: 'income' | 'outcome';
   category: string;
+}
+
+interface GetTransactionInterface {
+  title: string;
+  value: number;
+  type: 'income' | 'outcome';
+  category: Category;
 }
 
 @EntityRepository(Transaction)
@@ -47,7 +54,7 @@ class TransactionsRepository extends Repository<Transaction> {
     value,
     type,
     category,
-  }: TransactionInterface): Promise<Transaction> {
+  }: CreateTransactionInterface): Promise<Transaction> {
     // CATCHING CATEGORY ID
     const categoryRepository = getRepository(Category);
     if (!category) throw new AppError('A category must need a title');
@@ -105,6 +112,23 @@ class TransactionsRepository extends Repository<Transaction> {
       updated_at,
       category: categoryObject,
     };
+  }
+
+  public async getTransactions(): Promise<GetTransactionInterface[]> {
+    const transactions = await this.find();
+
+    const categoryRepository = getRepository(Category);
+    const categories = await categoryRepository.find();
+
+    transactions.forEach((transaction: Transaction): void => {
+      categories.forEach((category: Category): void => {
+        if (transaction.category_id === category.id) {
+          Object.assign(transaction, { category });
+        }
+      });
+    });
+
+    return transactions;
   }
 }
 

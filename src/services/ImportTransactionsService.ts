@@ -88,9 +88,6 @@ class ImportTransactionsService {
 
     await transactionsRepository.save(createdTransactions);
 
-    const categoriesTest = await categoriesRepository.find();
-    console.log(categoriesTest);
-
     await fs.promises.unlink(path.join(uploadConfig.directory, filename));
     return createdTransactions;
   }
